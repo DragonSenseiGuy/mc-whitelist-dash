@@ -33,8 +33,7 @@ export default function ServerStatus() {
     const labels: Record<string, string> = {
       "start-server": "start the Minecraft server",
       "stop-server": "stop the Minecraft server (disconnects all players)",
-      "shutdown-rpi": "shut down the Raspberry Pi (everything goes offline)",
-      "wake-rpi": "send a Wake-on-LAN packet to the Raspberry Pi",
+      "reboot-rpi": "reboot the Raspberry Pi (temporarily disconnects everything)",
     };
     if (!confirm(`Are you sure you want to ${labels[action]}?`)) return;
     setPowerAction(action);
@@ -118,22 +117,13 @@ export default function ServerStatus() {
               {powerAction === "stop-server" ? "Stopping…" : "■ Stop Server"}
             </button>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => handlePower("wake-rpi")}
-              disabled={powerAction !== null}
-              className="flex-1 text-xs font-mono bg-bg-input border border-border rounded px-2 py-2 text-status-online hover:bg-status-online/10 transition-colors disabled:opacity-50"
-            >
-              {powerAction === "wake-rpi" ? "Sending…" : "⏼ Wake RPi"}
-            </button>
-            <button
-              onClick={() => handlePower("shutdown-rpi")}
-              disabled={powerAction !== null}
-              className="flex-1 text-xs font-mono bg-bg-input border border-border rounded px-2 py-2 text-status-offline hover:bg-status-offline/10 transition-colors disabled:opacity-50"
-            >
-              {powerAction === "shutdown-rpi" ? "Shutting down…" : "⏻ Shutdown RPi"}
-            </button>
-          </div>
+          <button
+            onClick={() => handlePower("reboot-rpi")}
+            disabled={powerAction !== null}
+            className="w-full text-xs font-mono bg-bg-input border border-border rounded px-2 py-2 text-status-warning hover:bg-status-warning/10 transition-colors disabled:opacity-50"
+          >
+            {powerAction === "reboot-rpi" ? "Rebooting…" : "⟳ Reboot RPi"}
+          </button>
         </div>
       </div>
 

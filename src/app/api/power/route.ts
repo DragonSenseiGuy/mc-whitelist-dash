@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   stopMinecraftServer,
   startMinecraftServer,
-  shutdownRpi,
-  wakeRpi,
+  rebootRpi,
 } from "@/lib/ssh";
 
 export const dynamic = "force-dynamic";
@@ -21,13 +20,9 @@ export async function POST(request: NextRequest) {
         await startMinecraftServer();
         return NextResponse.json({ success: true, message: "Minecraft server started" });
 
-      case "shutdown-rpi":
-        await shutdownRpi();
-        return NextResponse.json({ success: true, message: "Raspberry Pi is shutting down" });
-
-      case "wake-rpi":
-        await wakeRpi();
-        return NextResponse.json({ success: true, message: "Wake-on-LAN packet sent" });
+      case "reboot-rpi":
+        await rebootRpi();
+        return NextResponse.json({ success: true, message: "Raspberry Pi is rebooting" });
 
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });

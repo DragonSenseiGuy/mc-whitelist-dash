@@ -1,5 +1,5 @@
 import { NodeSSH } from "node-ssh";
-import dgram from "dgram";
+
 
 const SSH_HOST = process.env.MC_SSH_HOST || "localhost";
 const SSH_USER = process.env.MC_SSH_USER || "server";
@@ -172,49 +172,19 @@ export async function startMinecraftServer(): Promise<string> {
   return "Minecraft server started";
 }
 
-export async function shutdownRpi(): Promise<string> {
+export async function rebootRpi(): Promise<string> {
   const sudoPass = process.env.MC_SSH_SUDO_PASS;
   if (!sudoPass) throw new Error("MC_SSH_SUDO_PASS is not configured");
 
   const ssh = await getSSHConnection();
   try {
-    await ssh.execCommand(`echo '${sudoPass.replace(/'/g, "'\\''")}' | sudo -S shutdown -h +0`, {
+    await ssh.execCommand(`echo '${sudoPass.replace(/'/g, "'\\''")}' | sudo -S reboot`, {
       execOptions: { pty: true },
     });
   } finally {
     ssh.dispose();
   }
-  return "Raspberry Pi is shutting down";
-}
-
-export async function wakeRpi(): Promise<string> {
-  const mac = process.env.MC_RPI_MAC;
-  if (!mac) throw new Error("MC_RPI_MAC is not configured");
-
-  const broadcast = process.env.MC_RPI_BROADCAST || "255.255.255.255";
-  const macBytes = Buffer.from(mac.replace(/[:-]/g, ""), "hex");
-  // Magic packet: 6x 0xFF followed by 16x MAC address
-  const payload = Buffer.alloc(6 + 16 * 6);
-  payload.fill(0xff, 0, 6);
-  for (let i = 0; i < 16; i++) {
-    macBytes.copy(payload, 6 + i * 6);
-  }
-
-  return new Promise((resolve, reject) => {
-    const socket = dgram.createSocket("udp4");
-    socket.once("error", (err) => {
-      socket.close();
-      reject(err);
-    });
-    socket.bind(() => {
-      socket.setBroadcast(true);
-      socket.send(payload, 0, payload.length, 9, broadcast, (err) => {
-        socket.close();
-        if (err) reject(err);
-        else resolve("Wake-on-LAN packet sent");
-      });
-    });
-  });
+  return "Raspberry Pi is rebooting";
 }
 
 export async function removeFromWhitelist(username: string): Promise<string> {
