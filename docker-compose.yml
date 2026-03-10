@@ -4,7 +4,7 @@ services:
     container_name: mc-admin-dashboard
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "4009:3000"
     environment:
       - MC_SSH_HOST=${MC_SSH_HOST}
       - MC_SSH_USER=${MC_SSH_USER:-server}
