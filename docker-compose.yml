@@ -21,9 +21,4 @@ services:
       - "traefik.http.routers.mc-admin.entrypoints=websecure"
       - "traefik.http.routers.mc-admin.tls.certresolver=letsencrypt"
       - "traefik.http.services.mc-admin.loadbalancer.server.port=3000"
-    networks:
-      - traefik
 
-networks:
-  traefik:
-    external: true
