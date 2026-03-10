@@ -1,0 +1,29 @@
+services:
+  mc-admin:
+    build: .
+    container_name: mc-admin-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - MC_SSH_HOST=${MC_SSH_HOST}
+      - MC_SSH_USER=${MC_SSH_USER:-server}
+      - MC_SSH_KEY_PATH=/etc/mc-dashboard/id_ed25519
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/app/data
+      - ${SSH_KEY_PATH:-~/.ssh/id_ed25519}:/etc/mc-dashboard/id_ed25519:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mc-admin.rule=Host(`${DASHBOARD_DOMAIN}`)"
+      - "traefik.http.routers.mc-admin.entrypoints=websecure"
+      - "traefik.http.routers.mc-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mc-admin.loadbalancer.server.port=3000"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true

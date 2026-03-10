@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0d0f12;
+  --accent: #00ff88;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1e2128 #0d0f12;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0d0f12;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #1e2128;
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #2a2e38;
+}
+
+body {
+  background-color: var(--bg);
+  color: #e0e0e0;
+  font-family: "JetBrains Mono", monospace;
+}
+
+::selection {
+  background-color: rgba(0, 255, 136, 0.25);
+  color: #00ff88;
+}
+
+/* Terminal cursor blink */
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink::after {
+  content: "▋";
+  color: #00ff88;
+  animation: blink 1s step-end infinite;
+}
+
+/* Glow effect */
+.glow-green {
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3),
+    0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+/* Scanline effect */
+.scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.05) 2px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Log line highlight */
+.log-line:hover {
+  background-color: rgba(0, 255, 136, 0.05);
+}
+
+/* Input focus ring */
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px #00ff88, 0 0 8px rgba(0, 255, 136, 0.2);
+}
+
+/* Button press effect */
+.btn-press:active {
+  transform: scale(0.97);
+}
