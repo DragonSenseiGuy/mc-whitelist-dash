@@ -6,6 +6,7 @@ import ServerStatus from "@/components/ServerStatus";
 const NAV_ITEMS = [
   { href: "/dashboard/logs", label: "Live Logs", icon: "▸" },
   { href: "/dashboard/whitelist", label: "Whitelist", icon: "▹" },
+  { href: "/dashboard/authme-config", label: "AuthMe Config", icon: "▹" },
 ];
 
 export default function DashboardLayout({

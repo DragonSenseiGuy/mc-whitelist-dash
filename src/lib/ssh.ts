@@ -211,3 +211,20 @@ export async function getOps(): Promise<Array<{ uuid: string; name: string }>> {
   );
   return JSON.parse(output);
 }
+
+export async function readAuthmeConfig(): Promise<string> {
+  return execCommand("cat ~/minecraft/authme-config.yml");
+}
+
+export async function writeAuthmeConfig(content: string): Promise<string> {
+  await execCommand(`cat > ~/minecraft/authme-config.yml << 'AUTHME_EOF'\n${content}\nAUTHME_EOF`);
+  return "Config saved";
+}
+
+export async function pushAuthmeConfig(): Promise<string> {
+  await execCommand(
+    "docker cp ~/minecraft/authme-config.yml minecraft-minecraft-1:/data/plugins/AuthMe/config.yml"
+  );
+  await execCommand("cd ~/minecraft && docker compose restart");
+  return "AuthMe config pushed and server restarting";
+}
