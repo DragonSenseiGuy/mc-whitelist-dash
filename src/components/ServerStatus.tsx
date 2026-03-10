@@ -11,6 +11,7 @@ interface StatusData {
 export default function ServerStatus() {
   const [status, setStatus] = useState<StatusData | null>(null);
   const [restarting, setRestarting] = useState<string | null>(null);
+  const [powerAction, setPowerAction] = useState<string | null>(null);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -27,6 +28,28 @@ export default function ServerStatus() {
     const interval = setInterval(fetchStatus, 15000);
     return () => clearInterval(interval);
   }, [fetchStatus]);
+
+  const handlePower = async (action: string) => {
+    const labels: Record<string, string> = {
+      "start-server": "start the Minecraft server",
+      "stop-server": "stop the Minecraft server (disconnects all players)",
+      "shutdown-rpi": "shut down the Raspberry Pi (everything goes offline)",
+    };
+    if (!confirm(`Are you sure you want to ${labels[action]}?`)) return;
+    setPowerAction(action);
+    try {
+      await fetch("/api/power", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      setTimeout(fetchStatus, 3000);
+    } catch {
+      // ignore
+    } finally {
+      setPowerAction(null);
+    }
+  };
 
   const handleRestart = async (container: "minecraft" | "eagler-proxy") => {
     if (
@@ -69,6 +92,40 @@ export default function ServerStatus() {
             restarting={restarting === "eagler-proxy"}
             onRestart={() => handleRestart("eagler-proxy")}
           />
+        </div>
+      </div>
+
+      {/* Power Controls */}
+      <div>
+        <h3 className="text-xs text-text-secondary font-mono uppercase tracking-wider mb-3">
+          Power
+        </h3>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => handlePower("start-server")}
+              disabled={powerAction !== null}
+              className="flex-1 text-xs font-mono bg-bg-input border border-border rounded px-2 py-2 text-status-online hover:bg-status-online/10 transition-colors disabled:opacity-50"
+            >
+              {powerAction === "start-server" ? "Starting…" : "▶ Start Server"}
+            </button>
+            <button
+              onClick={() => handlePower("stop-server")}
+              disabled={powerAction !== null}
+              className="flex-1 text-xs font-mono bg-bg-input border border-border rounded px-2 py-2 text-status-warning hover:bg-status-warning/10 transition-colors disabled:opacity-50"
+            >
+              {powerAction === "stop-server" ? "Stopping…" : "■ Stop Server"}
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handlePower("shutdown-rpi")}
+              disabled={powerAction !== null}
+              className="flex-1 text-xs font-mono bg-bg-input border border-border rounded px-2 py-2 text-status-offline hover:bg-status-offline/10 transition-colors disabled:opacity-50"
+            >
+              {powerAction === "shutdown-rpi" ? "Shutting down…" : "⏻ Shutdown RPi"}
+            </button>
+          </div>
         </div>
       </div>
 

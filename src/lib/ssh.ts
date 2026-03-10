@@ -157,6 +157,25 @@ export async function addToWhitelist(username: string): Promise<string> {
   return `Added ${username} to whitelist — UUID not found in logs, used server lookup`;
 }
 
+export async function stopMinecraftServer(): Promise<string> {
+  await execCommand(
+    "docker compose -f /home/server/minecraft/docker-compose.yml down"
+  );
+  return "Minecraft server stopped";
+}
+
+export async function startMinecraftServer(): Promise<string> {
+  await execCommand(
+    "docker compose -f /home/server/minecraft/docker-compose.yml up -d"
+  );
+  return "Minecraft server started";
+}
+
+export async function shutdownRpi(): Promise<string> {
+  await execCommand("sudo shutdown -h now");
+  return "Raspberry Pi is shutting down";
+}
+
 export async function removeFromWhitelist(username: string): Promise<string> {
   return execCommand(
     `docker exec -i minecraft-minecraft-1 rcon-cli whitelist remove ${username}`
