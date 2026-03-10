@@ -31,11 +31,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 
-USER nextjs
-
 EXPOSE 4010
 
 ENV PORT=4010
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "chown nextjs:nodejs /app/data && su -s /bin/sh nextjs -c 'node server.js'"]
