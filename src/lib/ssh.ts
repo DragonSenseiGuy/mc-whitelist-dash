@@ -172,10 +172,14 @@ export async function startMinecraftServer(): Promise<string> {
 }
 
 export async function shutdownRpi(): Promise<string> {
+  const sudoPass = process.env.MC_SSH_SUDO_PASS;
+  if (!sudoPass) throw new Error("MC_SSH_SUDO_PASS is not configured");
+
   const ssh = await getSSHConnection();
   try {
-    // Use nohup + background so the SSH session can close before shutdown kills it
-    await ssh.execCommand("nohup sudo shutdown -h +0 &");
+    await ssh.execCommand(`echo '${sudoPass.replace(/'/g, "'\\''")}' | sudo -S shutdown -h +0`, {
+      execOptions: { pty: true },
+    });
   } finally {
     ssh.dispose();
   }
