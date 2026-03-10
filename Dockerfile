@@ -36,4 +36,4 @@ EXPOSE 4010
 ENV PORT=4010
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "chown nextjs:nodejs /app/data && su -s /bin/sh nextjs -c 'node server.js'"]
+CMD ["sh", "-c", "chown nextjs:nodejs /app/data && chmod 644 /etc/mc-dashboard/id_ed25519 && su -s /bin/sh nextjs -c 'node server.js'"]
