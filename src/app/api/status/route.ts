@@ -17,7 +17,7 @@ export async function GET() {
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: msg, containers: { paper: false, waterfall: false }, players: { online: 0, max: 0, players: [] } },
+      { error: msg, containers: { paper: false, eaglerProxy: false }, players: { online: 0, max: 0, players: [] } },
       { status: 500 }
     );
   }
@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const { container } = await request.json();
 
-  if (container !== "minecraft" && container !== "waterfall") {
+  if (container !== "minecraft" && container !== "eagler-proxy") {
     return NextResponse.json(
       { error: "Invalid container name" },
       { status: 400 }

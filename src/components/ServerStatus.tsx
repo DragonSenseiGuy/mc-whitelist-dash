@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 interface StatusData {
-  containers: { paper: boolean; waterfall: boolean };
+  containers: { paper: boolean; eaglerProxy: boolean };
   players: { online: number; max: number; players: string[] };
   error?: string;
 }
@@ -28,7 +28,7 @@ export default function ServerStatus() {
     return () => clearInterval(interval);
   }, [fetchStatus]);
 
-  const handleRestart = async (container: "minecraft" | "waterfall") => {
+  const handleRestart = async (container: "minecraft" | "eagler-proxy") => {
     if (
       !confirm(`Restart ${container} container? This will disconnect players.`)
     )
@@ -64,10 +64,10 @@ export default function ServerStatus() {
             onRestart={() => handleRestart("minecraft")}
           />
           <ContainerRow
-            name="Waterfall"
-            running={status?.containers.waterfall ?? false}
-            restarting={restarting === "waterfall"}
-            onRestart={() => handleRestart("waterfall")}
+            name="Eagler Proxy"
+            running={status?.containers.eaglerProxy ?? false}
+            restarting={restarting === "eagler-proxy"}
+            onRestart={() => handleRestart("eagler-proxy")}
           />
         </div>
       </div>

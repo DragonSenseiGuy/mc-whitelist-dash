@@ -32,7 +32,7 @@ export async function execCommand(command: string): Promise<string> {
 
 export async function getContainerStatus(): Promise<{
   paper: boolean;
-  waterfall: boolean;
+  eaglerProxy: boolean;
 }> {
   try {
     const output = await execCommand(
@@ -43,12 +43,12 @@ export async function getContainerStatus(): Promise<{
       paper: lines.some(
         (l) => l.includes("minecraft") && l.toLowerCase().includes("up")
       ),
-      waterfall: lines.some(
+      eaglerProxy: lines.some(
         (l) => l.includes("eagler-proxy") && l.toLowerCase().includes("up")
       ),
     };
   } catch {
-    return { paper: false, waterfall: false };
+    return { paper: false, eaglerProxy: false };
   }
 }
 
@@ -80,12 +80,12 @@ export async function getPlayerCount(): Promise<{
 }
 
 export async function restartContainer(
-  container: "minecraft" | "waterfall"
+  container: "minecraft" | "eagler-proxy"
 ): Promise<string> {
   const containerName =
     container === "minecraft"
       ? "minecraft-minecraft-1"
-      : "minecraft-waterfall-1";
+      : "eagler-proxy-eagler-proxy-1";
   return execCommand(`docker restart ${containerName}`);
 }
 
