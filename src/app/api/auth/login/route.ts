@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getAdmin } from "@/lib/db";
-import { signToken, setAuthCookie } from "@/lib/auth";
+import { signToken, createAuthCookie } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const { email, password } = await request.json();
@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
   }
 
   const token = signToken({ email });
-  setAuthCookie(token);
+  const response = NextResponse.json({ success: true });
+  response.cookies.set(createAuthCookie(token));
 
-  return NextResponse.json({ success: true });
+  return response;
 }
