@@ -192,3 +192,22 @@ export async function removeFromWhitelist(username: string): Promise<string> {
     `docker exec -i minecraft-minecraft-1 rcon-cli whitelist remove ${username}`
   );
 }
+
+export async function opPlayer(username: string): Promise<string> {
+  return execCommand(
+    `docker exec -i minecraft-minecraft-1 rcon-cli "op ${username}"`
+  );
+}
+
+export async function deopPlayer(username: string): Promise<string> {
+  return execCommand(
+    `docker exec -i minecraft-minecraft-1 rcon-cli "deop ${username}"`
+  );
+}
+
+export async function getOps(): Promise<Array<{ uuid: string; name: string }>> {
+  const output = await execCommand(
+    "docker exec minecraft-minecraft-1 cat /data/ops.json"
+  );
+  return JSON.parse(output);
+}

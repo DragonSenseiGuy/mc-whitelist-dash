@@ -14,6 +14,8 @@ export default function WhitelistPage() {
   const [username, setUsername] = useState("");
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
+  const [togglingOp, setTogglingOp] = useState<string | null>(null);
+  const [ops, setOps] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState("");
   const [warning, setWarning] = useState("");
   const [recentUUIDs, setRecentUUIDs] = useState<
@@ -38,9 +40,22 @@ export default function WhitelistPage() {
     }
   }, []);
 
+  const fetchOps = useCallback(async () => {
+    try {
+      const res = await fetch("/api/whitelist/op");
+      const data = await res.json();
+      if (data.ops) {
+        setOps(new Set(data.ops.map((o: { name: string }) => o.name.toLowerCase())));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
     fetchWhitelist();
-  }, [fetchWhitelist]);
+    fetchOps();
+  }, [fetchWhitelist, fetchOps]);
 
   // Parse UUIDs from SSE logs
   useEffect(() => {
@@ -167,6 +182,41 @@ export default function WhitelistPage() {
       setError("Network error");
     } finally {
       setRemoving(null);
+    }
+  };
+
+  const handleToggleOp = async (name: string) => {
+    const isOp = ops.has(name.toLowerCase());
+    const action = isOp ? "deop" : "op";
+    if (!confirm(`${isOp ? "Remove OP from" : "Give OP to"} ${name}?`)) return;
+    setTogglingOp(name);
+    setMessage("");
+    setError("");
+
+    try {
+      const res = await fetch("/api/whitelist/op", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: name, action }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || `Failed to ${action} player`);
+        return;
+      }
+
+      setMessage(`${isOp ? "Removed OP from" : "Gave OP to"} ${name}`);
+      if (data.ops) {
+        setOps(new Set(data.ops.map((o: { name: string }) => o.name.toLowerCase())));
+      } else {
+        await fetchOps();
+      }
+    } catch {
+      setError("Network error");
+    } finally {
+      setTogglingOp(null);
     }
   };
 
@@ -318,31 +368,60 @@ export default function WhitelistPage() {
               </div>
 
               {/* Player Rows */}
-              {players.map((player) => (
-                <div
-                  key={player.uuid}
-                  className="grid grid-cols-[1fr_2fr_auto] px-5 py-3 items-center hover:bg-bg-hover transition-colors group"
-                >
-                  <span className="text-sm font-mono text-text-primary flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-accent/50 rounded-full group-hover:bg-accent transition-colors" />
-                    {player.name}
-                  </span>
-                  <span className="text-xs font-mono text-text-secondary">
-                    {player.uuid}
-                  </span>
-                  <button
-                    onClick={() => handleRemove(player.name)}
-                    disabled={removing === player.name}
-                    className="text-xs font-mono text-text-muted hover:text-status-offline transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+              {players.map((player) => {
+                const isOp = ops.has(player.name.toLowerCase());
+                return (
+                  <div
+                    key={player.uuid}
+                    className="grid grid-cols-[1fr_2fr_auto] px-5 py-3 items-center hover:bg-bg-hover transition-colors group"
                   >
-                    {removing === player.name ? (
-                      <span className="animate-pulse-glow">REMOVING...</span>
-                    ) : (
-                      "✕ REMOVE"
-                    )}
-                  </button>
-                </div>
-              ))}
+                    <span className="text-sm font-mono text-text-primary flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-accent/50 rounded-full group-hover:bg-accent transition-colors" />
+                      {player.name}
+                      {isOp && (
+                        <span className="text-[10px] font-mono bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 px-1.5 py-0.5 rounded">
+                          OP
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs font-mono text-text-secondary">
+                      {player.uuid}
+                    </span>
+                    <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleToggleOp(player.name)}
+                        disabled={togglingOp === player.name}
+                        className={`text-xs font-mono transition-colors disabled:opacity-50 ${
+                          isOp
+                            ? "text-yellow-400 hover:text-yellow-300"
+                            : "text-text-muted hover:text-yellow-400"
+                        }`}
+                      >
+                        {togglingOp === player.name ? (
+                          <span className="animate-pulse-glow">
+                            {isOp ? "DEOPING..." : "OPING..."}
+                          </span>
+                        ) : isOp ? (
+                          "⚡ DEOP"
+                        ) : (
+                          "⚡ OP"
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleRemove(player.name)}
+                        disabled={removing === player.name}
+                        className="text-xs font-mono text-text-muted hover:text-status-offline transition-colors disabled:opacity-50"
+                      >
+                        {removing === player.name ? (
+                          <span className="animate-pulse-glow">REMOVING...</span>
+                        ) : (
+                          "✕ REMOVE"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
