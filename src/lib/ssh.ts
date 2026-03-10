@@ -44,7 +44,7 @@ export async function getContainerStatus(): Promise<{
         (l) => l.includes("minecraft") && l.toLowerCase().includes("up")
       ),
       waterfall: lines.some(
-        (l) => l.includes("waterfall") && l.toLowerCase().includes("up")
+        (l) => l.includes("eagler-proxy") && l.toLowerCase().includes("up")
       ),
     };
   } catch {
