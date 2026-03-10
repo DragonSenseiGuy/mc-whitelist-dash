@@ -34,6 +34,7 @@ export default function ServerStatus() {
       "start-server": "start the Minecraft server",
       "stop-server": "stop the Minecraft server (disconnects all players)",
       "shutdown-rpi": "shut down the Raspberry Pi (everything goes offline)",
+      "wake-rpi": "send a Wake-on-LAN packet to the Raspberry Pi",
     };
     if (!confirm(`Are you sure you want to ${labels[action]}?`)) return;
     setPowerAction(action);
@@ -118,6 +119,13 @@ export default function ServerStatus() {
             </button>
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={() => handlePower("wake-rpi")}
+              disabled={powerAction !== null}
+              className="flex-1 text-xs font-mono bg-bg-input border border-border rounded px-2 py-2 text-status-online hover:bg-status-online/10 transition-colors disabled:opacity-50"
+            >
+              {powerAction === "wake-rpi" ? "Sending…" : "⏼ Wake RPi"}
+            </button>
             <button
               onClick={() => handlePower("shutdown-rpi")}
               disabled={powerAction !== null}

@@ -3,6 +3,7 @@ import {
   stopMinecraftServer,
   startMinecraftServer,
   shutdownRpi,
+  wakeRpi,
 } from "@/lib/ssh";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,10 @@ export async function POST(request: NextRequest) {
       case "shutdown-rpi":
         await shutdownRpi();
         return NextResponse.json({ success: true, message: "Raspberry Pi is shutting down" });
+
+      case "wake-rpi":
+        await wakeRpi();
+        return NextResponse.json({ success: true, message: "Wake-on-LAN packet sent" });
 
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
