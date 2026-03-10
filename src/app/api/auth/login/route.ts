@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { getAdmin } from "@/lib/db";
 import { signToken, createAuthCookie } from "@/lib/auth";
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function POST(request: NextRequest) {
   const { email, password } = await request.json();
@@ -13,16 +14,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const admin = getAdmin(email);
-  if (!admin) {
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
     return NextResponse.json(
-      { error: "Invalid credentials" },
-      { status: 401 }
+      { error: "Admin credentials not configured" },
+      { status: 500 }
     );
   }
 
-  const valid = await bcrypt.compare(password, admin.password_hash);
-  if (!valid) {
+  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
     return NextResponse.json(
       { error: "Invalid credentials" },
       { status: 401 }

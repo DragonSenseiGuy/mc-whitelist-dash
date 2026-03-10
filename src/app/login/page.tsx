@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -9,19 +9,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/auth/check")
-      .then((r) => r.json())
-      .then((data) => {
-        if (!data.hasAdmin) {
-          router.replace("/setup");
-        }
-        setChecking(false);
-      })
-      .catch(() => setChecking(false));
-  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,16 +36,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  if (checking) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-text-secondary font-mono text-sm animate-pulse-glow">
-          INITIALIZING...
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
