@@ -172,7 +172,13 @@ export async function startMinecraftServer(): Promise<string> {
 }
 
 export async function shutdownRpi(): Promise<string> {
-  await execCommand("sudo shutdown -h now");
+  const ssh = await getSSHConnection();
+  try {
+    // Use nohup + background so the SSH session can close before shutdown kills it
+    await ssh.execCommand("nohup sudo shutdown -h +0 &");
+  } finally {
+    ssh.dispose();
+  }
   return "Raspberry Pi is shutting down";
 }
 
