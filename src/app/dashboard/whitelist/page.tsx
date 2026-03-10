@@ -15,6 +15,7 @@ export default function WhitelistPage() {
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [warning, setWarning] = useState("");
   const [recentUUIDs, setRecentUUIDs] = useState<
     Array<{ name: string; uuid: string }>
   >([]);
@@ -100,6 +101,7 @@ export default function WhitelistPage() {
     if (!username.trim()) return;
     setAdding(true);
     setMessage("");
+    setWarning("");
     setError("");
 
     try {
@@ -116,7 +118,12 @@ export default function WhitelistPage() {
         return;
       }
 
-      setMessage(`Added ${username} to whitelist`);
+      const serverMsg = data.message || "";
+      if (serverMsg.includes("UUID not found in logs")) {
+        setWarning(`Added ${username} — UUID not found in logs, used server lookup (may be incorrect)`);
+      } else {
+        setMessage(serverMsg || `Added ${username} to whitelist`);
+      }
       setUsername("");
       if (data.whitelist) {
         setPlayers(data.whitelist);
@@ -206,6 +213,11 @@ export default function WhitelistPage() {
         {message && (
           <div className="bg-accent/10 border border-accent/30 rounded px-4 py-2.5 text-accent text-sm font-mono animate-fade-in">
             ✓ {message}
+          </div>
+        )}
+        {warning && (
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded px-4 py-2.5 text-yellow-400 text-sm font-mono animate-fade-in">
+            ⚠ {warning}
           </div>
         )}
 

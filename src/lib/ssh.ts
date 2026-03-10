@@ -98,10 +98,63 @@ export async function getWhitelist(): Promise<
   return JSON.parse(output);
 }
 
+export async function getUUIDFromLogs(username: string): Promise<string | null> {
+  try {
+    const output = await execCommand(
+      `docker compose -f /home/server/minecraft/docker-compose.yml logs --no-color 2>&1 | grep -i "UUID of player ${username} is" | tail -1`
+    );
+    const match = output.match(/UUID of player \w+ is ([0-9a-f-]+)/i);
+    if (match) return match[1];
+
+    // Also try disconnect pattern: id=uuid,name=NAME
+    const output2 = await execCommand(
+      `docker compose -f /home/server/minecraft/docker-compose.yml logs --no-color 2>&1 | grep -i "id=[0-9a-f-]*,name=${username}" | tail -1`
+    );
+    const match2 = output2.match(/id=([0-9a-f-]+),name=\w+/i);
+    if (match2) return match2[1];
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function addToWhitelist(username: string): Promise<string> {
-  return execCommand(
+  // First, try to find the UUID from server logs
+  const logUUID = await getUUIDFromLogs(username);
+
+  if (logUUID) {
+    // Read current whitelist
+    const currentWhitelist = await getWhitelist();
+
+    // Remove existing entry for this player if present
+    const filtered = currentWhitelist.filter(
+      (p) => p.name.toLowerCase() !== username.toLowerCase()
+    );
+
+    // Add with the correct UUID from logs
+    filtered.push({ uuid: logUUID, name: username });
+
+    // Write the updated whitelist.json
+    const json = JSON.stringify(filtered, null, 2);
+    await execCommand(
+      `docker exec -i minecraft-minecraft-1 sh -c 'cat > /data/whitelist.json' <<'WHITELIST_EOF'\n${json}\nWHITELIST_EOF`
+    );
+
+    // Reload the whitelist in-game
+    await execCommand(
+      `docker exec -i minecraft-minecraft-1 rcon-cli whitelist reload`
+    );
+
+    return `Added ${username} to whitelist (UUID from logs: ${logUUID})`;
+  }
+
+  // Fallback: UUID not in logs, still add via RCON
+  await execCommand(
     `docker exec -i minecraft-minecraft-1 rcon-cli whitelist add ${username}`
   );
+
+  return `Added ${username} to whitelist — UUID not found in logs, used server lookup`;
 }
 
 export async function removeFromWhitelist(username: string): Promise<string> {
