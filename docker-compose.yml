@@ -13,15 +13,3 @@ services:
     volumes:
       - ./data:/app/data
       - ${SSH_KEY_PATH:-~/.ssh/id_ed25519}:/etc/mc-dashboard/id_ed25519:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.mc-admin.rule=Host(`${DASHBOARD_DOMAIN}`)"
-      - "traefik.http.routers.mc-admin.entrypoints=websecure"
-      - "traefik.http.routers.mc-admin.tls.certresolver=letsencrypt"
-      - "traefik.http.services.mc-admin.loadbalancer.server.port=3000"
-    networks:
-      - dokploy-network
-
-networks:
-  dokploy-network:
-    external: true
