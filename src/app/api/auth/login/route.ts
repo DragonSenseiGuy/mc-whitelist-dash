@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { signToken, createAuthCookie } from "@/lib/auth";
+import { signToken } from "@/lib/auth";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -29,8 +29,5 @@ export async function POST(request: NextRequest) {
   }
 
   const token = signToken({ email });
-  const response = NextResponse.json({ success: true });
-  response.cookies.set(createAuthCookie(token));
-
-  return response;
+  return NextResponse.json({ success: true, token });
 }
