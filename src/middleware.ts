@@ -32,23 +32,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // If token came from query param, set it as a cookie and redirect to clean URL
-  if (request.nextUrl.searchParams.has("_token")) {
-    const cleanUrl = new URL(request.url);
-    cleanUrl.searchParams.delete("_token");
-    const response = NextResponse.redirect(cleanUrl);
-    response.cookies.set({
-      name: "mc_admin_token",
-      value: token,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none" as const,
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-    return response;
-  }
-
   return NextResponse.next();
 }
 
