@@ -17,6 +17,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -29,13 +30,16 @@ export default function LoginPage() {
 
       if (data.token) {
         localStorage.setItem("mc_admin_token", data.token);
+        // Navigate within the current frame (not top-level)
+        window.self.location.assign(`/dashboard/logs?_token=${data.token}`);
+        return;
       }
 
-      // Use full navigation with token in URL for iframe compatibility
-      // (middleware strips the token param and attempts to set the cookie)
-      window.location.href = `/dashboard/logs?_token=${data.token}`;
-    } catch {
-      setError("Network error");
+      setError("Login succeeded but no token received");
+    } catch (err) {
+      setError(
+        "Network error: " + (err instanceof Error ? err.message : String(err))
+      );
     } finally {
       setLoading(false);
     }
