@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Player {
   uuid: string;
@@ -25,7 +26,7 @@ export default function WhitelistPage() {
 
   const fetchWhitelist = useCallback(async () => {
     try {
-      const res = await fetch("/api/whitelist");
+      const res = await fetchWithAuth("/api/whitelist");
       const data = await res.json();
       if (data.whitelist) {
         setPlayers(data.whitelist);
@@ -42,7 +43,7 @@ export default function WhitelistPage() {
 
   const fetchOps = useCallback(async () => {
     try {
-      const res = await fetch("/api/whitelist/op");
+      const res = await fetchWithAuth("/api/whitelist/op");
       const data = await res.json();
       if (data.ops) {
         setOps(new Set(data.ops.map((o: { name: string }) => o.name.toLowerCase())));
@@ -59,7 +60,8 @@ export default function WhitelistPage() {
 
   // Parse UUIDs from SSE logs
   useEffect(() => {
-    const es = new EventSource("/api/logs");
+    const token = localStorage.getItem("mc_admin_token");
+    const es = new EventSource(token ? `/api/logs?_token=${token}` : "/api/logs");
     const uuids: Array<{ name: string; uuid: string }> = [];
 
     es.onmessage = (event) => {
@@ -120,7 +122,7 @@ export default function WhitelistPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/whitelist", {
+      const res = await fetchWithAuth("/api/whitelist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: username.trim() }),
@@ -159,7 +161,7 @@ export default function WhitelistPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/whitelist/remove", {
+      const res = await fetchWithAuth("/api/whitelist/remove", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: name }),
@@ -194,7 +196,7 @@ export default function WhitelistPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/whitelist/op", {
+      const res = await fetchWithAuth("/api/whitelist/op", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: name, action }),

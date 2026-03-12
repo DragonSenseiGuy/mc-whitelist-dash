@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface StatusData {
   containers: { paper: boolean; eaglerProxy: boolean };
@@ -15,7 +16,7 @@ export default function ServerStatus() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/status");
+      const res = await fetchWithAuth("/api/status");
       const data = await res.json();
       setStatus(data);
     } catch {
@@ -38,7 +39,7 @@ export default function ServerStatus() {
     if (!confirm(`Are you sure you want to ${labels[action]}?`)) return;
     setPowerAction(action);
     try {
-      await fetch("/api/power", {
+      await fetchWithAuth("/api/power", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
@@ -58,7 +59,7 @@ export default function ServerStatus() {
       return;
     setRestarting(container);
     try {
-      await fetch("/api/status", {
+      await fetchWithAuth("/api/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ container }),

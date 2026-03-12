@@ -19,7 +19,8 @@ export default function LogsPage() {
 
     setStatus("connecting");
 
-    const es = new EventSource("/api/logs");
+    const token = typeof window !== "undefined" ? localStorage.getItem("mc_admin_token") : null;
+    const es = new EventSource(token ? `/api/logs?_token=${token}` : "/api/logs");
     eventSourceRef.current = es;
 
     es.onmessage = (event) => {

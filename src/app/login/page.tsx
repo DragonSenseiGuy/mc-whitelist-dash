@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +27,13 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace("/dashboard/logs");
+      if (data.token) {
+        localStorage.setItem("mc_admin_token", data.token);
+      }
+
+      // Use full navigation with token in URL for iframe compatibility
+      // (middleware strips the token param and attempts to set the cookie)
+      window.location.href = `/dashboard/logs?_token=${data.token}`;
     } catch {
       setError("Network error");
     } finally {

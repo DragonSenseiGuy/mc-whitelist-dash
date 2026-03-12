@@ -45,7 +45,14 @@ export default function DashboardLayout({
               return (
                 <button
                   key={item.href}
-                  onClick={() => router.push(item.href)}
+                  onClick={() => {
+                    const token = localStorage.getItem("mc_admin_token");
+                    if (token) {
+                      window.location.href = `${item.href}?_token=${token}`;
+                    } else {
+                      router.push(item.href);
+                    }
+                  }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded text-sm font-mono transition-all ${
                     active
                       ? "bg-accent/10 text-accent border border-accent/20"
@@ -73,6 +80,7 @@ export default function DashboardLayout({
             onClick={() => {
               document.cookie =
                 "mc_admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+              localStorage.removeItem("mc_admin_token");
               router.push("/login");
             }}
             className="w-full text-xs font-mono text-text-muted hover:text-status-offline transition-colors text-left"

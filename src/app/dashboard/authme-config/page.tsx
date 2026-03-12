@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export default function AuthmeConfigPage() {
   const [content, setContent] = useState("");
@@ -14,7 +15,7 @@ export default function AuthmeConfigPage() {
   } | null>(null);
 
   useEffect(() => {
-    fetch("/api/authme-config")
+    fetchWithAuth("/api/authme-config")
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
@@ -36,7 +37,7 @@ export default function AuthmeConfigPage() {
     setSaving(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/authme-config", {
+      const res = await fetchWithAuth("/api/authme-config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
@@ -64,7 +65,7 @@ export default function AuthmeConfigPage() {
     try {
       // Save first if there are unsaved changes
       if (hasChanges) {
-        const saveRes = await fetch("/api/authme-config", {
+        const saveRes = await fetchWithAuth("/api/authme-config", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content }),
@@ -77,7 +78,7 @@ export default function AuthmeConfigPage() {
         setOriginalContent(content);
       }
 
-      const res = await fetch("/api/authme-config", { method: "POST" });
+      const res = await fetchWithAuth("/api/authme-config", { method: "POST" });
       const data = await res.json();
       if (data.error) {
         setMessage({ text: data.error, type: "error" });
